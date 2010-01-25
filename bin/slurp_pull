@@ -25,5 +25,5 @@ story_file = ARGV.empty? ? "stories.#{Time.now.to_i}.slurper" : ARGV[0]
 
 stories = Story.find(:all)
 stories.reverse! unless options[:reverse]
-lines = stories.collect { |story| story.dump }.flatten
+lines = stories.collect { |story| story.slurper_serialize }.flatten
 File.open(story_file, "w") { |f| lines.each { |l| f.write l} }
