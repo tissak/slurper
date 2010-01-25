@@ -32,18 +32,28 @@ class Story < ActiveResource::Base
     @story_lines
   end
 
-  def dump
+  def slurper_serialize
+    keys = @attributes.keys
     story_lines = []
     story_lines.push "id\n"
-    story_lines.push "  #{id}\n"
-    story_lines.push "name\n"
-    story_lines.push "  #{name}\n"
-    story_lines.push "description\n"
-    description.split("\n").each do |line|
-      story_lines.push "  #{line}\n"
+    story_lines.push "  #{self.id}\n"
+    if keys.include? "name"
+      story_lines.push "name\n"
+      story_lines.push "  #{self.name}\n"
     end
-    story_lines.push "labels\n"
-    story_lines.push "  #{labels}\n"
+    if keys.include? "description"
+      story_lines.push "description\n"      
+      # story_lines.push "  #{self.description}\n"
+      unless self.description.nil?
+        self.description.split("\n").each do |dline|
+          story_lines.push "  #{dline}\n"
+        end
+      end
+    end
+    if keys.include? "labels"
+      story_lines.push "labels\n"
+      story_lines.push "  #{self.labels}\n"
+    end
     story_lines.push "===============\n"
     story_lines
   end
