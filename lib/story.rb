@@ -5,22 +5,24 @@ class Story < ActiveResource::Base
   @@defaults = YAML.load_file('story_defaults.yml')
   self.site = "http://www.pivotaltracker.com/services/v2/projects/#{@@defaults['project_id']}"
   headers['X-TrackerToken'] = @@defaults.delete("token")
-  attr_accessor :story_lines
+  attr_accessor :story_lines, :has_id_set
 
   def initialize(attributes = {})
+    @has_id_set     = false
     @attributes     = {}
     @prefix_options = {}
     load(@@defaults.merge(attributes))
   end
 
   def parse(story_lines)
-    @story_lines = story_lines
+    @story_lines = story_lines.clone
+    parse_id
     parse_name
     parse_description
     parse_labels
     self
   end
-
+  
   def updated_lines
     unless @has_id_set
       @story_lines.insert 0, "id\n"
