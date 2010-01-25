@@ -4,6 +4,14 @@ Slurper allows you to quickly compose your stories in a text file and import the
 
 Works great with slurper.vim! (http://github.com/alowe/vim-slurper)
 
+== Update Capbability
+
+After slurping, surp will make a backup of your original slurp file and replace it with a new file containing an id element for each story added. As long as this id element remains present you can modify the story with changes being synced next time you run slurp on the file. 
+
+If you add new stories to the file, these will be created on next slurp and given an id also. Hence you can update and add to the same file.
+
+Note that by default a backup file will be created of your original slurp. The '-n' option can be used if you trust slurp to write over the original file.
+
 == Note on Patches/Pull Requests
 
 * Fork the project.

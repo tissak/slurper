@@ -21,7 +21,29 @@ class Story < ActiveResource::Base
     self
   end
 
+  def updated_lines
+    unless @has_id_set
+      @story_lines.insert 0, "id\n"
+      @story_lines.insert 1, "  #{self.id}\n"
+    end
+    @story_lines.push "===============\n"
+    @story_lines
+  end
+
   private
+  
+  def parse_id
+    @story_lines.each_with_index do |line, i|
+      if start_of_value?(line, 'id')
+        if starts_with_whitespace?(@story_lines[i+1])
+          @attributes["id"] = @story_lines[i+1].strip
+          @has_id_set = true
+        else
+          @attributes.delete("id")
+        end
+      end
+    end
+  end
 
   def parse_name
     @story_lines.each_with_index do |line, i|

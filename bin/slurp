@@ -19,6 +19,9 @@ OptionParser.new do |opts|
   opts.on("-r", "--reverse", "Reverse story creation order") do |v|
     options[:reverse] = v
   end
+  opts.on("-n", "--no-backup", "Skip preserving a backup of the original slurp file") do |b|
+    options[:skip_backup] = true
+  end
 end.parse!
 
 story_file = ARGV.empty? ? "stories.slurper" : ARGV[0]
@@ -37,3 +40,9 @@ end
 stories.reverse! unless options[:reverse]
 
 stories.each { |story| story.save }
+
+# regenerate slurp file with ID's to allow updates.
+stories.reverse! unless options[:reverse]
+lines = stories.collect { |story| story.updated_lines }.flatten
+File.rename(story_file, "#{story_file}.#{Time.now.to_i}.bak") unless options[:skip_backup]
+File.open(story_file, "w") { |f| lines.each { |l| f.write l} }
