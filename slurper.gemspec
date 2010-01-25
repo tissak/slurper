@@ -18,16 +18,17 @@ Gem::Specification.new do |s|
       your way through the Tracker UI.
     }
   s.email = %q{info@hashrocket.com}
-  s.executables = ["slurp"]
+  s.executables = ["slurp","slurp_pull"]
   s.extra_rdoc_files = [
     "README.rdoc"
   ]
   s.files = [
     "bin/slurp",
-     "lib/slurper.rb",
-     "lib/story.rb"
+    "bin/slurp_pull",
+    "lib/slurper.rb",
+    "lib/story.rb"
   ]
-  s.homepage = %q{http://github.com/hashrocket/slurper}
+  s.homepage = %q{http://github.com/tissak/slurper}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.5}

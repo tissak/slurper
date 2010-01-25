@@ -32,6 +32,22 @@ class Story < ActiveResource::Base
     @story_lines
   end
 
+  def dump
+    story_lines = []
+    story_lines.push "id\n"
+    story_lines.push "  #{id}\n"
+    story_lines.push "name\n"
+    story_lines.push "  #{name}\n"
+    story_lines.push "description\n"
+    description.split("\n").each do |line|
+      story_lines.push "  #{line}\n"
+    end
+    story_lines.push "labels\n"
+    story_lines.push "  #{labels}\n"
+    story_lines.push "===============\n"
+    story_lines
+  end
+  
   private
   
   def parse_id
