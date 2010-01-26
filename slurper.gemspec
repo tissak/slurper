@@ -18,13 +18,14 @@ Gem::Specification.new do |s|
       your way through the Tracker UI.
     }
   s.email = %q{info@hashrocket.com}
-  s.executables = ["slurp","slurp_pull"]
+  s.executables = ["slurp","slurp_pull", "slurp_scaffold"]
   s.extra_rdoc_files = [
     "README.rdoc"
   ]
   s.files = [
     "bin/slurp",
     "bin/slurp_pull",
+    "bin/slurp_scaffold",
     "lib/slurper.rb",
     "lib/story.rb"
   ]
