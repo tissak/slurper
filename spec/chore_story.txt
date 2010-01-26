@@ -1,0 +1,15 @@
+id
+  2284153
+name
+  New chore
+requested_by
+  Donald Smith
+estimate
+  2
+story_type
+  chore
+description
+  Simple chore
+labels
+  ui,story
+===============

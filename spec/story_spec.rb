@@ -24,7 +24,7 @@ describe Story do
     end
   end
 
-  context "given values for all attributes" do
+  context "given values for all base attributes" do
     before do
       story_lines = IO.readlines(File.dirname(__FILE__) + "/full_story.txt")
       @story = Story.new.parse(story_lines)
@@ -40,6 +40,53 @@ describe Story do
 
     it "parses the label correctly" do
       @story.labels.should == "money,power,fame"
+    end
+  end
+
+  context "given values for full attributes" do
+    before do
+      story_lines = IO.readlines(File.dirname(__FILE__) + "/fuller_story.txt")
+      @story = Story.new.parse(story_lines)
+    end
+
+    it "parses the id correctly" do
+      @story.id.should == "2284153"
+    end
+    
+    it "parses the name correctly" do
+      @story.name.should == "Next Story about UI Update"
+    end
+    
+    it "parses the requested by correctly" do
+      @story.requested_by.should == "James Brown"
+    end
+    
+    it "parses the estimate correctly" do
+      @story.estimate.should == 2
+    end
+
+    it "parses the description correctly" do
+      @story.description.should == "Something exciting to do with the UI. \nWith an update.\n"
+    end
+
+    it "parses the label correctly" do
+      @story.labels.should == "ui,story"
+    end
+  end
+
+  # chores and bugs do not have estimates
+  context "for chore stories" do
+    before do
+      story_lines = IO.readlines(File.dirname(__FILE__) + "/chore_story.txt")
+      @story = Story.new.parse(story_lines)
+    end
+    
+    it "parses the owner correctly" do
+      @story.requested_by.should == "Donald Smith"
+    end
+
+    it "parses and corrects the estimate correctly" do
+      @story.estimate.should == -1
     end
   end
 
