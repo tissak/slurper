@@ -27,3 +27,4 @@ stories = Story.find(:all)
 stories.reverse! unless options[:reverse]
 lines = stories.collect { |story| story.slurper_serialize }.flatten
 File.open(story_file, "w") { |f| lines.each { |l| f.write l} }
+puts "Complete: #{story_file}"

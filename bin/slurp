@@ -38,7 +38,6 @@ IO.foreach(story_file) do |line|
 end
 
 stories.reverse! unless options[:reverse]
-
 stories.each { |story| story.save }
 
 # regenerate slurp file with ID's to allow updates.

@@ -10,19 +10,25 @@ class Story < ActiveResource::Base
   def initialize(attributes = {})
     @has_id_set     = false
     @attributes     = {}
-    @prefix_options = {}
+    @prefix_options = {}    
     load(@@defaults.merge(attributes))
   end
-
+  
+  # deconstruct an entry into attributes to submit
   def parse(story_lines)
     @story_lines = story_lines.clone
     parse_id
-    parse_name
+    parse_for("name")
+    parse_requested_by
+    parse_estimate
     parse_description
-    parse_labels
+    parse_for("labels")
+    # do last just in case chore / bug requires resetting estimate
+    parse_story_type
     self
   end
   
+  # take the existing lines and insert an ID if newly created
   def updated_lines
     unless @has_id_set
       @story_lines.insert 0, "id\n"
@@ -31,60 +37,100 @@ class Story < ActiveResource::Base
     @story_lines.push "===============\n"
     @story_lines
   end
-
+  
+  # take the current AR object and turn into lines for slurp file storage
   def slurper_serialize
-    keys = @attributes.keys
+    @keys = @attributes.keys
     story_lines = []
     story_lines.push "id\n"
     story_lines.push "  #{self.id}\n"
-    if keys.include? "name"
-      story_lines.push "name\n"
-      story_lines.push "  #{self.name}\n"
+    simple_output story_lines, "name"
+    simple_output story_lines, "requested_by"
+    simple_output story_lines, "estimate"
+    simple_output story_lines, "story_type"
+    multiline_output story_lines, "description"
+    simple_output story_lines, "labels"
+    story_lines.push "===============\n"
+    story_lines
+  end
+
+  private
+  
+  # print out name / value in slurp file format. Data is one line only
+  def simple_output(story_lines, field)
+    if @keys.include? field
+      story_lines.push "#{field}\n"
+      story_lines.push "  #{@attributes[field]}\n"
     end
-    if keys.include? "description"
-      story_lines.push "description\n"      
-      # story_lines.push "  #{self.description}\n"
-      unless self.description.nil?
-        self.description.split("\n").each do |dline|
+  end
+
+  # print out name / value in slurp file format. Data can be multi lined  
+  def multiline_output(story_lines, field)
+    if @keys.include? field
+      story_lines.push "#{field}\n"      
+      unless @attributes[field].nil?
+        @attributes[field].split("\n").each do |dline|
           story_lines.push "  #{dline}\n"
         end
       end
     end
-    if keys.include? "labels"
-      story_lines.push "labels\n"
-      story_lines.push "  #{self.labels}\n"
+  end
+
+  # generic search for item.
+  def parse_for(item_name)
+    return_val = false
+    @story_lines.each_with_index do |line, i|
+      if start_of_value?(line, item_name)
+        if starts_with_whitespace?(@story_lines[i+1])
+          @attributes[item_name] = @story_lines[i+1].strip
+          return_val = true
+        else
+          @attributes.delete(item_name)
+        end
+      end
     end
-    story_lines.push "===============\n"
-    story_lines
   end
   
-  private
+  # only let restricted types through - bug, chore, feature
+  def parse_story_type
+    parse_for("story_type")
+    unless @attributes["story_type"].nil?
+      unless ["chore","bug","feature"].include?(@attributes["story_type"])
+        @attributes.delete("story_type") 
+      else
+        # when creating a chore / bug there is no estimate.
+        @attributes["estimate"] = -1 if ["chore","bug"].include?(@attributes["story_type"])
+      end
+    end
+  end
   
+  # standard approach only we need to track if we set an id for updating the source file
   def parse_id
+    @has_id_set = parse_for("id")
+  end
+  
+  # standard approach only if we don't find one, leave the existing default intact
+  def parse_requested_by
     @story_lines.each_with_index do |line, i|
-      if start_of_value?(line, 'id')
+      if start_of_value?(line, "requested_by")
         if starts_with_whitespace?(@story_lines[i+1])
-          @attributes["id"] = @story_lines[i+1].strip
-          @has_id_set = true
-        else
-          @attributes.delete("id")
+          @attributes["requested_by"] = @story_lines[i+1].strip
         end
       end
     end
   end
-
-  def parse_name
-    @story_lines.each_with_index do |line, i|
-      if start_of_value?(line, 'name')
-        if starts_with_whitespace?(@story_lines[i+1])
-          @attributes["name"] = @story_lines[i+1].strip
-        else
-          @attributes.delete("name")
-        end
-      end
+  
+  # make sure the value is int and within range.
+  def parse_estimate
+    estimate = parse_for "estimate"
+    unless @attributes["estimate"].nil?
+      val = @attributes["estimate"].to_i
+      val = (val > 3 || val < -1) ? -1 : val
+      @attributes["estimate"] = val
     end
   end
 
+  # handle multi line descriptions
   def parse_description
     @story_lines.each_with_index do |line, i|
       if start_of_value?(line, 'description')
@@ -93,18 +139,6 @@ class Story < ActiveResource::Base
           desc << next_line
         end
         desc.empty? ? @attributes.delete("description") : @attributes["description"] = desc.join.gsub(/^ +/, "").gsub(/^\t+/, "")
-      end
-    end
-  end
-
-  def parse_labels
-    @story_lines.each_with_index do |line, i|
-      if start_of_value?(line, 'labels')
-        if starts_with_whitespace?(@story_lines[i+1])
-          @attributes["labels"] = @story_lines[i+1].strip
-        else
-          @attributes.delete("labels")
-        end
       end
     end
   end
