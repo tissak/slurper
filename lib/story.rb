@@ -42,8 +42,7 @@ class Story < ActiveResource::Base
   def slurper_serialize
     @keys = @attributes.keys
     story_lines = []
-    story_lines.push "id\n"
-    story_lines.push "  #{self.id}\n"
+    simple_output story_lines, "id"
     simple_output story_lines, "name"
     simple_output story_lines, "requested_by"
     simple_output story_lines, "estimate"
@@ -89,6 +88,7 @@ class Story < ActiveResource::Base
         end
       end
     end
+    return_val
   end
   
   # only let restricted types through - bug, chore, feature
